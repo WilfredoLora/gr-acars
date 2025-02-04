@@ -21,42 +21,49 @@
 #ifndef INCLUDED_ACARS_ACARS_IMPL_H
 #define INCLUDED_ACARS_ACARS_IMPL_H
 
-#include <acars/acars.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
+#include <acars/acars.h>      // Base class (acars)
+#include <cstdio>            // for FILE*, std::printf, etc.
+#include <vector>            // for std::vector
+#include <string>
 
-#include <gnuradio/fft/fft.h>
-#include <gnuradio/fft/fft_shift.h>
+#include <gnuradio/fft/fft.h>         // if you need fft classes
+#include <gnuradio/fft/fft_shift.h>   // remove if not used
 
 namespace gr {
-  namespace acars {
+namespace acars {
 
-    class acars_impl : public acars
-    {
-     private:
-        int _Ntot;
-        int _N;
-        float _threshold;
-	int _savenum;
-        int _decompte;  // accumulate more sentences than needed (in case of a gap)
-        float *_d;      // raw data
-        float _seuil;   // threshold value (multiply std with this value to detect msg)
-        FILE *_FILE;    // output file descriptor
-        char *_toutd,*_tout,*_message,*_somme; // digital messages
-        void acars_parse (char *message,int ends);
-        float remove_avgf(const float *d,float *out,int tot_len);
-        void acars_dec(float *d,int N);
+class acars_impl : public acars
+{
+private:
+    int   _Ntot;      ///< total number of samples accumulated
+    int   _N;         ///< number of items in the current work call
+    float _threshold; ///< running threshold
+    int   _savenum;   ///< flag to save raw data
+    int   _decompte;  ///< accumulate extra chunks if needed
+    float _seuil;     ///< user threshold multiplier
+    FILE* _FILE;      ///< output file pointer
 
-     public:
-      void set_seuil(float seuil1);
-      acars_impl(float seuil, std::string filename, bool saveall);
-      ~acars_impl();
+    // Using std::vector rather than raw pointers
+    std::vector<float> _d;       ///< buffer for raw data
+    std::vector<char>  _toutd;   ///< buffer for demod bits
+    std::vector<char>  _tout;    ///< buffer for final bits
+    std::vector<char>  _message; ///< buffer for message bytes
+    std::vector<char>  _somme;   ///< buffer for parity or other checks
 
-    // Where all the action really happens
+    void  acars_parse(char* message, int ends);
+    float remove_avgf(const float* d, float* out, int tot_len);
+    void  acars_dec(float* d, int N);
+
+public:
+    acars_impl(float seuil, std::string filename, bool saveall);
+    ~acars_impl();
+
+    void set_seuil(float seuil1);
+
+    // Core processing method
     int work(int noutput_items,
              gr_vector_const_void_star& input_items,
-             gr_vector_void_star& output_items);
+             gr_vector_void_star& output_items) override;
 };
 
 } // namespace acars
