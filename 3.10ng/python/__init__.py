@@ -4,20 +4,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# The presence of this file turns this directory into a Python package
+"""
+This is the GNU Radio ACARS module.
+It provides blocks and utilities for decoding ACARS signals.
+"""
 
-'''
-This is the GNU Radio ACARS module. Place your Python package
-description here (python/__init__.py).
-'''
 import os
 
-# import pybind11 generated symbols into the acars namespace
+# Attempt to import the compiled Python bindings (pybind11 or SWIG-generated),
+# which might not exist if the module is pure Python only.
 try:
-    # this might fail if the module is python-only
     from .acars_python import *
 except ModuleNotFoundError:
+    # If the library isn't found, you may leave this as a silent pass
     pass
 
-# import any pure python here
-#
+# If you have pure-Python classes or functions, import or define them here:
+# from .my_python_block import MyPythonBlock
