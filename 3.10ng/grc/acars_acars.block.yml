@@ -1,6 +1,6 @@
 id: acars_acars
 label: acars
-category: '[acars]'
+category: '[ACARS]'
 
 parameters:
 - id: threshold
